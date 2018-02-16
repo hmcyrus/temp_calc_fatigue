@@ -27,7 +27,7 @@ assert tower_sections[total_sections-1][2] == total_cans , "mismatch in can numb
 
 # total weld points = total number of cans + total number of sections
 total_fatigue_points = total_cans + total_sections
-tower_fatige_points = np.zeros( shape = (total_fatigue_points, 6) )
+tower_fatigue_points = np.zeros( shape = (total_fatigue_points, 6) )
 
 #can_no-0, can_height_bottom-1, can_height_top-2, can_outer_dia_bottom-3, can_outer_dia_top-4, 
 #can_inner_dia_bottom-5, can_inner_dia_top-6, section_modulus_bottom-7, section_modulus_top-8
@@ -49,7 +49,7 @@ for row in tower_sections:
             temp[4] = tower_cans[i-1][7]
             temp[5] = tower_cans[i][7]
         
-        tower_fatige_points[fatigue_point_counter] = temp
+        tower_fatigue_points[fatigue_point_counter] = temp
         fatigue_point_counter+=1
         print temp
 
@@ -61,7 +61,7 @@ for row in tower_sections:
             temp[2] = temp[3] = (tower_cans[i][4] - tower_cans[i][6]) / 2 # Column E and F
             # Column G and H # above and below section modulus will be same for top weld point in each section
             temp[4] = temp[5] = tower_cans[i][8]
-            tower_fatige_points[fatigue_point_counter] = temp
+            tower_fatigue_points[fatigue_point_counter] = temp
             fatigue_point_counter+=1
             print temp       
     print "-"    
