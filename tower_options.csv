@@ -1,0 +1,2 @@
+detail_category_weld, dc_bracket, calc_SCF_butt,calc_SCF_cone, calc_SCF_flange, weld_prep_angle, weld_ground_flush, joint_type, max_misalignment_accidental_eccentricity, additional_SCF
+90, 80, DNVGL_butt, TRUE, FALSE, 30, FALSE, Standard, 0.0030
