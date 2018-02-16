@@ -66,6 +66,7 @@ for row in tower_sections:
             print temp       
     print "-"    
 
+np.savetxt('tower_fatigue.csv', tower_fatigue_points, fmt='%0.3f', delimiter=',')
     
 
 
