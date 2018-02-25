@@ -1,2 +1,2 @@
-detail_category_weld, dc_bracket, calc_SCF_butt,calc_SCF_cone, calc_SCF_flange, weld_prep_angle, weld_ground_flush, joint_type, max_misalignment_accidental_eccentricity, additional_SCF
-90, 80, DNVGL_butt, TRUE, FALSE, 30, FALSE, Standard, 0.0030
+dc_weld, dc_bracket, calc_SCF_butt,calc_SCF_cone, calc_SCF_flange, weld_prep_angle, weld_ground_flush, joint_type, max_misalignment_accidental_eccentricity, additional_SCF, quality_class, Ue_max,thickness_exponent_weld,t_ref,fatigue_material_factor,DEL_Nref,N,m1,m2,loga1,loga2,N_bracket,m1_bracket,m2_bracket,loga1_bracket,loga2_bracket
+90,80, DNVGL_butt, TRUE, FALSE,30, FALSE, Standard,0.003,1, B,0.2,0.2,0.025,1.265,10000000,2000000,3,5,12.16375752,15.8069492,2000000,3,5,12.01029996,15.55118659
