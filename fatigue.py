@@ -41,7 +41,7 @@ if os.path.isfile("tower_options.csv"):
 # dc_weld-0, dc_bracket-1, calc_SCF_butt-2, calc_SCF_cone-3, calc_SCF_flange-4, weld_prep_angle-5, weld_ground_flush-6
 # joint_type-7, max_misalignment_accidental_eccentricity-8, additional_SCF-9, quality_class-10, Ue_max-11,
 # thickness_exponent_weld-12, t_ref-13, fatigue_material_factor-14, DEL_Nref-15, N-16, m1-17, m2-18, loga1-19, loga2-20 
-# N_bracket-21, m1_bracket-22, m2_bracket-23, loga1_bracket-24, loga2_bracket-25
+# N_bracket-21, m1_bracket-22, m2_bracket-23, loga1_bracket-24, loga2_bracket-25, DEL_m-26
 tower_options = np.genfromtxt('tower_options.csv', delimiter=',', skip_header=1, dtype='unicode')
 
 # total weld points = total number of cans + total number of sections
@@ -99,8 +99,8 @@ for row in tower_sections:
         # Column AD
         temp[14] = calc_scf_total(temp[12], temp[13], temp[11], temp[10])
         
-        # Column AJ
-        temp[15] = tower_del_my[fatigue_point_counter] / min(temp[4], temp[5])
+        # Column AJ # the division by 10^3 is for unit adjustment
+        temp[15] = (tower_del_my[fatigue_point_counter] / min(temp[4], temp[5]) ) / 1000
 
         # Column AK #dc_weld
         temp[16] = tower_options[0]
@@ -112,15 +112,12 @@ for row in tower_sections:
         temp[18] = ( max(temp[2], temp[3]) / float(tower_options[13]) ) ** temp[17]
 
         # Column AN
-        sigma_ref_en = 10 ** ( ( np.log10(  float(tower_options[16]) ) - np.log10(float(tower_options[19])) ) / float(tower_options[17]) )
-        #sigma_ref_en = 10 ** ( ( np.log10(  float(tower_options[16]) ) - float(tower_options[19]) ) / float(tower_options[17]) )
-        temp[19] = sigma_ref_en / (temp[18] * float(tower_options[14]))
-        #print sigma_ref_en
-        #print temp[19]
-        #break
+        sigma_ref_en = 10 ** ( ( float(tower_options[19]) - np.log10(  float(tower_options[16]) )  ) / float(tower_options[17]) )
+        temp[19] = sigma_ref_en / (temp[18] * float(tower_options[14]) * temp[14])
 
         # Column AO
-        temp[20] = 10**( (np.log10(2) + 6) + tower_del_my[fatigue_point_counter] * np.log10(temp[19]) - tower_del_my[fatigue_point_counter] * np.log10(temp[15]) )
+		# DEL_m comes from D39 of General_Inputs sheet
+        temp[20] = 10**( np.log10(2e6) + float(tower_options[26]) * (np.log10(temp[19]) - np.log10(temp[15])) )
 
         # Column AP
         temp[21] = float(tower_options[15])/temp[20]
@@ -132,12 +129,16 @@ for row in tower_sections:
         temp[23] = float(tower_options[1])
 
         # Column AS
-        sigma_ref_bracket = 10 ** ( ( np.log10( float( tower_options[21]) ) - float( tower_options[24]) ) / float(tower_options[22]) )
-        sigma_ref_bracket_factored = sigma_ref_en / ( float( tower_options[9]) * float(tower_options[14]) )
-        temp[24] = 10**( np.log10( float( tower_options[21]) ) + ( tower_del_my[fatigue_point_counter] * sigma_ref_bracket_factored ) - ( tower_del_my[fatigue_point_counter] * temp[15]) )
+        # sigma_ref_bracket = 10 ** ( ( float( tower_options[24]) - np.log10( float( tower_options[21]) ) ) / float(tower_options[22]) )
+		# numerical value 3 is used in place of m1
+        sigma_ref_bracket = 10**( ( float( tower_options[24]) - np.log10(2e6) ) / 3 )
+        sigma_ref_bracket_factored = sigma_ref_bracket / ( float( tower_options[9]) * float(tower_options[14]) )        
+        temp[24] = 10**( np.log10( float( tower_options[21]) ) + float(tower_options[26]) * (np.log10(sigma_ref_bracket_factored) - np.log10(temp[15]) )
 
         # Column AT
-        temp[25] = float(tower_options[15]) / temp[24]
+        print tower_options[15]
+        print temp[24]
+        temp[25] = float(tower_options[15]) + float(temp[24])
 
         # Column AU
         temp[26] = ( ( 1 / temp[25]**(1/ float( tower_options[22]))) - 1 ) * 100
@@ -171,8 +172,8 @@ for row in tower_sections:
             # def calc_scf_total(cone1, cone2, inner, outer):
             # Column AD
             temp[14] = calc_scf_total(temp[12], temp[13], temp[11], temp[10])
-            # Column AJ
-            temp[15] = tower_del_my[fatigue_point_counter] / min(temp[4], temp[5])
+            # Column AJ # the division by 10^3 is for unit adjustment
+            temp[15] = (tower_del_my[fatigue_point_counter] / min(temp[4], temp[5]) ) / 1000
             # Column AK #dc_weld
             temp[16] = tower_options[0]
             # Column AL
@@ -180,10 +181,11 @@ for row in tower_sections:
             # Column AM 
             temp[18] = ( max(temp[2], temp[3]) / float(tower_options[13]) ) ** temp[17]
             # Column AN
-            sigma_ref_en = 10 ** ( ( np.log10(  float(tower_options[16]) ) - float(tower_options[19]) ) / float(tower_options[17]) )
-            temp[19] = sigma_ref_en / (temp[18] * float(tower_options[14]))
+            sigma_ref_en = 10 ** ( ( float(tower_options[19]) - np.log10(  float(tower_options[16]) )  ) / float(tower_options[17]) )
+            temp[19] = sigma_ref_en / (temp[18] * float(tower_options[14]) * temp[14])
             # Column AO
-            temp[20] = 10**( (np.log10(2) + 6) + tower_del_my[fatigue_point_counter] * np.log10(temp[19]) - tower_del_my[fatigue_point_counter] * np.log10(temp[15]) )
+            # DEL_m comes from D39 of General_Inputs sheet
+            temp[20] = 10**( np.log10(2e6) + float(tower_options[26]) * (np.log10(temp[19]) - np.log10(temp[15])) )
             # Column AP
             temp[21] = float(tower_options[15])/temp[20]
             # Column AQ
@@ -191,13 +193,15 @@ for row in tower_sections:
             # Column AR
             temp[23] = float(tower_options[1])
             # Column AS
-            sigma_ref_bracket = 10 ** ( ( np.log10( float( tower_options[21]) ) - float( tower_options[24]) ) / float(tower_options[22]) )
-            sigma_ref_bracket_factored = sigma_ref_en / ( float( tower_options[9]) * float(tower_options[14]) )
-            temp[24] = 10**( np.log10( float( tower_options[21]) ) + ( tower_del_my[fatigue_point_counter] * sigma_ref_bracket_factored ) - ( tower_del_my[fatigue_point_counter] * temp[15]) )
+            # sigma_ref_bracket = 10 ** ( ( float( tower_options[24]) - np.log10( float( tower_options[21]) ) ) / float(tower_options[22]) )
+            # numerical value 3 is used in place of m1
+            sigma_ref_bracket = 10**( ( float( tower_options[24]) - np.log10(2e6) ) / 3 )
+            sigma_ref_bracket_factored = sigma_ref_bracket / ( float( tower_options[9]) * float(tower_options[14]) )        
+            temp[24] = 10**( np.log10( float( tower_options[21]) ) + float(tower_options[26]) * (np.log10(sigma_ref_bracket_factored) - np.log10(temp[15]) )
             # Column AT
             temp[25] = float(tower_options[15]) / temp[24]
             # Column AU
-            temp[26] = ( ( 1 / temp[25]**(1/ float( tower_options[22]))) - 1 ) * 100
+            temp[26] = ( ( 1 / temp[25]**(1/ float( tower_options[22]))) - 1 ) * 100            
             
             tower_fatigue_points[fatigue_point_counter] = temp
             fatigue_point_counter+=1
