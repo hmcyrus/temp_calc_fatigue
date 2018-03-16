@@ -14,7 +14,7 @@ def calc_scf_total(cone1, cone2, inner, outer):
 print "ok"
 
 if os.path.isfile("tower_sections.csv"):
-    print "reading section inputs"
+    print ("reading section inputs")
 else:
     print "tower_sections.csv not found"
 
@@ -64,8 +64,12 @@ for row in tower_sections:
         temp = np.zeros(27)
         temp[0] = tower_cans[i][1]  # Column C
         temp[1] = tower_cans[i][3]  # Column D
-        temp[2] = (tower_cans[i][3] - tower_cans[i][5]) / 2 # Column E
-        temp[3] = (tower_cans[i][4] - tower_cans[i][6]) / 2 # Column F
+        # Column E, F
+        if i == int(row[1])-1: # first weld point of a section
+            temp[2] = temp[3] = (tower_cans[i][3] - tower_cans[i][5]) / 2 
+        else:
+            temp[2] =  (tower_cans[i-1][4] - tower_cans[i-1][6]) / 2
+            temp[3] =  (tower_cans[i][3] - tower_cans[i][5]) / 2
         
         # Column G and H
         if i == int(row[1])-1: # first weld point of a section
@@ -121,7 +125,7 @@ for row in tower_sections:
 
         # Column AP
         temp[21] = float(tower_options[15])/temp[20]
-        print tower_options[15]
+        # print tower_options[15]
 
         # Column AQ
         temp[22] = ( ( 1 / temp[21]**(1/ float(tower_options[17]) ) ) - 1 ) * 100
@@ -132,13 +136,20 @@ for row in tower_sections:
         # Column AS
         # sigma_ref_bracket = 10 ** ( ( float( tower_options[24]) - np.log10( float( tower_options[21]) ) ) / float(tower_options[22]) )
 		# numerical value 3 is used in place of m1
+        # try:
         sigma_ref_bracket = 10**( ( float( tower_options[24]) - np.log10(2e6) ) / 3 )
         sigma_ref_bracket_factored = sigma_ref_bracket / ( float( tower_options[9]) * float(tower_options[14]) )        
-        temp[24] = 10**( np.log10( float( tower_options[21]) ) + float(tower_options[26]) * (np.log10(sigma_ref_bracket_factored) - np.log10(temp[15]) )
-        print temp[24]
+        temp[24] = 10**( np.log10( float( tower_options[21]) ) + float(tower_options[26]) * (np.log10(sigma_ref_bracket_factored) - np.log10(temp[15]) ))
+        # except:
+            # print "overflowerror in calculating temp[24]"
+        #print temp[24]
 
         # Column AT
-        temp[25] = float(tower_options[15]) # + float(temp[24])
+        temp[25] = float(tower_options[15]) / float(temp[24])
+        # try:
+        #     temp[25] = float(tower_options[15]) / float(temp[24])
+        # except:
+        #     print "weird :/"
 
         # Column AU
         temp[26] = ( ( 1 / temp[25]**(1/ float( tower_options[22]))) - 1 ) * 100
@@ -195,9 +206,12 @@ for row in tower_sections:
             # Column AS
             # sigma_ref_bracket = 10 ** ( ( float( tower_options[24]) - np.log10( float( tower_options[21]) ) ) / float(tower_options[22]) )
             # numerical value 3 is used in place of m1
-            sigma_ref_bracket = 10**( ( float( tower_options[24]) - np.log10(2e6) ) / 3 )
-            sigma_ref_bracket_factored = sigma_ref_bracket / ( float( tower_options[9]) * float(tower_options[14]) )        
-            temp[24] = 10**( np.log10( float( tower_options[21]) ) + float(tower_options[26]) * (np.log10(sigma_ref_bracket_factored) - np.log10(temp[15]) )
+            try:
+                sigma_ref_bracket = 10**( ( float( tower_options[24]) - np.log10(2e6) ) / 3 )
+                sigma_ref_bracket_factored = sigma_ref_bracket / ( float( tower_options[9]) * float(tower_options[14]) )        
+                temp[24] = 10**( np.log10( float( tower_options[21]) ) + float(tower_options[26]) * (np.log10(sigma_ref_bracket_factored) - np.log10(temp[15]) ))
+            except:
+                print "overflowerror in calculating temp[24]"
             # Column AT
             temp[25] = float(tower_options[15]) / temp[24]
             # Column AU
