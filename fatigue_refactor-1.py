@@ -108,45 +108,45 @@ def single_can_calculation(max_misalignment, ue_max, t_below, t_above, dia, can_
     return can_values
 
 
-if os.path.isfile("tower_sections.csv"):
+if os.path.isfile("tower_sections_input.csv"):
     print "reading section inputs"
 else:
     print "tower_sections.csv not found"
 
 #section_no-0, can_no_base-1, can_no_top-2, height_flange_base-3, height_flange_top-4
-tower_sections = np.genfromtxt('tower_sections.csv', delimiter=',', skip_header=1)
+tower_sections = np.genfromtxt('tower_sections_input.csv', delimiter=',', skip_header=1)
 total_sections = int(np.shape(tower_sections)[0])
 print "number of sections read - " + str(total_sections)
 
-if os.path.isfile("tower_cans.csv"):
+if os.path.isfile("tower_cans_input.csv"):
     print "reading can inputs"
 
 #can_no-0, can_height_bottom-1, can_height_top-2, can_outer_dia_bottom-3, can_outer_dia_top-4, 
 #can_inner_dia_bottom-5, can_inner_dia_top-6, section_modulus_bottom-7, section_modulus_top-8
-tower_cans = np.genfromtxt('tower_cans.csv', delimiter=',', skip_header=1)
+tower_cans = np.genfromtxt('tower_cans_input.csv', delimiter=',', skip_header=1)
 
 total_cans = int(np.shape(tower_cans)[0])
 print "number of cans read - " + str(total_cans)
 
 assert tower_sections[total_sections-1][2] == total_cans , "mismatch in can number"
 
-if os.path.isfile("tower_options.csv"):
+if os.path.isfile("tower_options_input.csv"):
     print "reading tower_options"
 
 # dc_weld-0, dc_bracket-1, calc_SCF_butt-2, calc_SCF_cone-3, calc_SCF_flange-4, weld_prep_angle-5, weld_ground_flush-6
 # joint_type-7, max_misalignment_accidental_eccentricity-8, additional_SCF-9, quality_class-10, Ue_max-11,
 # thickness_exponent_weld-12, t_ref-13, fatigue_material_factor-14, DEL_Nref-15, N-16, m1-17, m2-18, loga1-19, loga2-20 
 # N_bracket-21, m1_bracket-22, m2_bracket-23, loga1_bracket-24, loga2_bracket-25, DEL_m-26
-tower_options = np.genfromtxt('tower_options.csv', delimiter=',', skip_header=1, dtype='unicode')
+tower_options = np.genfromtxt('tower_options_input.csv', delimiter=',', skip_header=1, dtype='unicode')
 
 # total weld points = total number of cans + total number of sections
 total_fatigue_points = total_cans + total_sections
 tower_fatigue_points = np.zeros( shape = (total_fatigue_points, 27) )
 
-if os.path.isfile("tower_cans_del_my.csv"):
+if os.path.isfile("tower_cans_del_my_input.csv"):
     print "reading del_my"
 
-tower_del_my = np.genfromtxt('tower_cans_del_my.csv', delimiter=',', skip_header=1)
+tower_del_my = np.genfromtxt('tower_cans_del_my_input.csv', delimiter=',', skip_header=1)
 assert int(np.shape(tower_del_my)[0]) == total_fatigue_points, "correct number of del_my"
 
 #can_no-0, can_height_bottom-1, can_height_top-2, can_outer_dia_bottom-3, can_outer_dia_top-4, 
@@ -225,7 +225,7 @@ for row in tower_sections:
 column_header = "H, D, t_below, t_above, w_below, w_above, max_misalignment_en1991, DEL_My, ecc_thickness, " + \
                 " misalign_SN_inner, misalign_SN_outer, SCF_butt_weld_outer, SCF_butt_weld_inner, SCF_cone_outer, SCF_cone_inner, total_SCF," + \
                 " DES, thickness_factor"
-np.savetxt('tower_fatigue-output.csv', tower_fatigue_points, fmt='%0.6f', delimiter=',', header= column_header)
+np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.6f', delimiter=',', header= column_header)
     
 
 

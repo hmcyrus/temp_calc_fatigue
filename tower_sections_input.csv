@@ -1,0 +1,6 @@
+section_no, can_no_base, can_no_top, height_flange_base, height_flange_top,outer_dia_flage_bottom,outer_dia_flage_top
+1,1,8,0.145,0.137,4.58,4.279
+2,9,18,0.137,0.124,4.279,4.273
+3,19,29,0.124,0.125,4.273,3.425
+4,30,39,0.125,0.122,3.425,3.214
+5,40,49,0.122,0.29,3.214,3.014
