@@ -84,7 +84,7 @@ def single_can_calculation(max_misalignment, ue_max, t_below, t_above, dia, can_
     else:        
         scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * dia ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_above ** 2
     can_values = np.append(can_values, [scf_cone_inner])
-    can_values = np.append(can_values, [ calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)])
+#    can_values = np.append(can_values, [ calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)])
 
     # # def calc_scf_total(cone1, cone2, inner, outer):
     # # Column AD # total_SCF
@@ -111,25 +111,30 @@ def single_can_calculation(max_misalignment, ue_max, t_below, t_above, dia, can_
     can_values = np.append(can_values, [sigma_ref_weld_factored])
 
     # # Column AO # N_allow_weld
-    # n_allowable_weld = 10**( np.log10(2e6) + del_m * (np.log10(sigma_ref_weld_factored) - np.log10(des)) )
+    n_allowable_weld = 10**( np.log10(2e6) + del_m * (np.log10(sigma_ref_weld_factored) - np.log10(des)) )
+    can_values = np.append(can_values, [n_allowable_weld])
 
     # # Column AP # damage_weld
-    # damage_weld = del_nref/n_allowable_weld    
+    damage_weld = del_nref/n_allowable_weld    
+    can_values = np.append(can_values, [damage_weld])
 
     # # Column AQ # DEL_margin_fatigue_weld
-    # del_margin_fatigue_weld = ( ( 1 / damage_weld**(1/ m1_weld ) ) - 1 ) * 100
+    del_margin_fatigue_weld = ( ( 1 / damage_weld**(1/ del_m ) ) - 1 ) * 100
+    can_values = np.append(can_values, [del_margin_fatigue_weld ])
 
     # # Column AS # N_allow_brackets
-    # sigma_ref_bracket = 10**( ( loga1_bracket - np.log10(2e6) ) / 3 ) 
-    # sigma_ref_bracket_factored = sigma_ref_bracket / ( scf_additional * fatigue_material_factor )        
-    # n_allowable_bracket = 10**( np.log10( n_bracket ) + del_m * (np.log10(sigma_ref_bracket_factored) - np.log10(des) ) )   
+    sigma_ref_bracket = 10**( ( loga1_bracket - np.log10(2e6) ) / 3. ) 
+    sigma_ref_bracket_factored = sigma_ref_bracket / ( scf_additional * fatigue_material_factor )        
+    n_allowable_bracket = 10**( np.log10( n_bracket ) + del_m * ( np.log10(sigma_ref_bracket_factored) - np.log10(des) ) )   
+    can_values = np.append(can_values, [n_allowable_bracket])
 
     # # Column AT # damage_brackets
-    # damage_bracket = del_nref/n_allowable_bracket
+    damage_bracket = del_nref/n_allowable_bracket
+    can_values = np.append(can_values, [damage_bracket])
 
     # # Column AU # DEL_margin_fatigue_brackets
-    # del_margin_fatigue_brackets = ( ( 1 / damage_bracket**(1/ m1_bracket)) - 1 ) * 100
-    # print can_values
+    del_margin_fatigue_brackets = ( ( 1 / damage_bracket**(1/ del_m )) - 1 ) * 100
+    can_values = np.append(can_values, [del_margin_fatigue_brackets])
     return can_values
 
 
@@ -268,7 +273,7 @@ column_header = "H, D, t_below, t_above, w_below, w_above, max_misalignment_en19
                 " DES, thickness_factor, sigma_ref_EN_weld_factored, N_allow_weld, damage_weld, DEL_margin_fatigue_weld," + \
                 " N_allow_brackets, damage_brackets, DEL_margin_fatigue_brackets"
                 
-np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.6f', delimiter=',', header= column_header)
+np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.10f', delimiter=',', header= column_header)
     
 
 
