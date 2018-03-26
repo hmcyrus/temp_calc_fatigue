@@ -7,12 +7,6 @@ def calc_tan_alpha(d_base, d_top, h):
 def calc_diff_in_alpha(d_base_prev, d_top_prev, h_prev, d_base_current, d_top_current, h_current):
     tan_alpha_prev = ((d_base_prev - d_top_prev) / 2) / h_prev
     tan_alpha_current = ((d_base_current - d_top_current) / 2) / h_current
-    print "d_base_prev " + str(d_base_prev) 
-    print "d_top_prev " + str(d_top_prev)
-    print "h_prev " + str(h_prev)
-    print "d_base_current " + str(d_base_current)
-    print "d_top_current " + str(d_top_current)
-    print "h_current " + str(h_current)
     print np.arctan(tan_alpha_current) - np.arctan(tan_alpha_prev)
     return np.arctan(tan_alpha_current) - np.arctan(tan_alpha_prev)
 
@@ -228,18 +222,16 @@ for row in tower_sections:
             outer_dia_top_prev = tower_cans[i-1][4]
             h_prev = tower_cans[i-1][9]
         
-        # print i
-        temp = np.zeros(27, dtype=float)
+        ### array used for storing all columns' value for a single can
+        can_columns = np.zeros(27, dtype=float)
         h_can = tower_cans[i][1]  # Column C
         dia_can = tower_cans[i][3]  # Column D #max comparison for D is to be done here
-        
         # t_bottom, t_top
         if i == 0 :
             t_below_can = t_above_can = (tower_cans[i][3] - tower_cans[i][5]) / 2 
         else:
             t_below_can =  (tower_cans[i-1][4] - tower_cans[i-1][6]) / 2 # t_below of a weld point comes from the Dtop, dtop of previous element
             t_above_can =  (tower_cans[i][3] - tower_cans[i][5]) / 2
-        
         # Column G and H
         if i == 0: 
             section_modulus_below_can = section_modulus_above_can = (np.pi/(32*tower_cans[i][3]))*(tower_cans[i][3]**4 - tower_cans[i][5]**4)
@@ -247,18 +239,8 @@ for row in tower_sections:
             section_modulus_below_can = (np.pi/(32*tower_cans[i-1][4]))*(tower_cans[i-1][4]**4 - tower_cans[i-1][6]**4)
             section_modulus_above_can = (np.pi/(32*tower_cans[i][3]))*(tower_cans[i][3]**4 - tower_cans[i][5]**4)
         
-        # dc_weld-0, dc_bracket-1, calc_SCF_butt-2, calc_SCF_cone-3, calc_SCF_flange-4, weld_prep_angle-5, weld_ground_flush-6
-        # joint_type-7, max_misalignment_accidental_eccentricity-8, additional_SCF-9, quality_class-10, Ue_max-11,
-        # thickness_exponent_weld-12, t_ref-13, fatigue_material_factor-14, DEL_Nref-15, N-16, m1-17, m2-18, loga1-19, loga2-20 
-        # N_bracket-21, m1_bracket-22, m2_bracket-23, loga1_bracket-24, loga2_bracket-25, DEL_m-26
-        # (max_misalignment, ue_max, t_below, t_above, dia, can_outer_dia_bottom, 
-        # can_outer_dia_top, height, del_m_y_can, scf_additional,
-        # w_above, w_below, dc_weld, dc_bracket, thickness_exponent_weld, t_ref, fatigue_material_factor, 
-        # loga1_weld, n_weld, m1_weld,
-        # del_m, del_nref, loga1_bracket, n_bracket, m1_bracket):
         print fatigue_point_counter
-#        calc_diff_in_alpha(outer_dia_base_prev, outer_dia_top_prev, h_prev, tower_cans[i][3], tower_cans[i][4], tower_cans[i][9])
-#        print temp[0]                
+
         can_values = single_can_calculation(float(tower_options[8]), float(tower_options[11]), t_below_can, t_above_can, dia_can, tower_cans[i][3], tower_cans[i][4], 
         h_can, tower_del_my[fatigue_point_counter], float(tower_options[9]),        
         section_modulus_above_can, section_modulus_below_can, float(tower_options[0]), float(tower_options[1]), float(tower_options[12]), float(tower_options[13]), float(tower_options[14]),        
@@ -266,15 +248,23 @@ for row in tower_sections:
         float(tower_options[26]), float(tower_options[15]), float(tower_options[24]), float(tower_options[21]), float(tower_options[22]), float(tower_cans[i][9]),
         outer_dia_base_prev, outer_dia_top_prev, h_prev )
 
-        temp[6:6+can_values.size] = can_values 
+        ### storing all columns' values in an array
+        can_columns[0] = h_can
+        can_columns[1] = dia_can
+        can_columns[2] = t_below_can
+        can_columns[3] = t_above_can
+        can_columns[4] = section_modulus_below_can
+        can_columns[5] = section_modulus_above_can
+        can_columns[6:6+can_values.size] = can_values 
          
-        tower_fatigue_points[fatigue_point_counter] = temp
+        tower_fatigue_points[fatigue_point_counter] = can_columns
         fatigue_point_counter+=1
         # print temp
 
         # for last can of each section 2 weld points are calculated
         if i == int(row[2]) -1:
-            temp = np.zeros(27)
+            ### array used for storing all columns' value for a single can
+            can_columns = np.zeros(27)
             h_can = tower_cans[i][2]  # Column C
             dia_can = tower_cans[i][3]  # Column D
             t_below_can = t_above_can = (tower_cans[i][4] - tower_cans[i][6]) / 2 # Column E and F
@@ -289,8 +279,15 @@ for row in tower_sections:
                                         float(tower_options[26]), float(tower_options[15]), float(tower_options[24]), float(tower_options[21]), float(tower_options[22]), tower_cans[i][9],
                                         1., 1., 1.)
             
-            temp[6:6+can_values.size] = can_values 
-            tower_fatigue_points[fatigue_point_counter] = temp
+            ### storing all columns' values in an array
+            can_columns[0] = h_can
+            can_columns[1] = dia_can
+            can_columns[2] = t_below_can
+            can_columns[3] = t_above_can
+            can_columns[4] = section_modulus_below_can
+            can_columns[5] = section_modulus_above_can
+            can_columns[6:6+can_values.size] = can_values 
+            tower_fatigue_points[fatigue_point_counter] = can_columns
             fatigue_point_counter+=1
             # print temp       
     print "-end of a section"    
@@ -300,9 +297,4 @@ column_header = "H, D, t_below, t_above, w_below, w_above, max_misalignment_en19
                 " DES, thickness_factor, sigma_ref_EN_weld_factored, N_allow_weld, damage_weld, DEL_margin_fatigue_weld," + \
                 " N_allow_brackets, damage_brackets, DEL_margin_fatigue_brackets"
                 
-np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.10f', delimiter=',', header= column_header)
-    
-
-
-# np.apply_along_axis( myfunction, axis=1, arr=mymatrix ) # for applying a function to each row
-
+np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.10f', delimiter=',', header= column_header)    
