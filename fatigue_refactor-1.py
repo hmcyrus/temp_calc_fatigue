@@ -22,7 +22,91 @@ def calc_scf_total(scf_cone_outer, scf_cone_inner, scf_butt_weld_inner, scf_butt
     total_outer = (scf_butt_weld_outer -1) + (cone -1) + 1
     return max(total_inner, total_outer, 1.)
 
-	
+###### calculates max_misalignment_en1991 of a single can
+def max_misalignment_en1991_can(max_misalignment, ue_max, t_above, t_below): 
+    max_misalignment_en1991 = min( max_misalignment, ue_max*((t_above + t_below)/2) )
+    return max_misalignment_en1991
+
+###### calculates ecc_thickness of a single can
+def ecc_thickness_can():
+    ecc_thickness = 0.0 # * (max_t - min_t)
+    return ecc_thickness
+
+###### calculates misalign_SN_inner and misalign_SN_outer of a single can and returns them in an array in same order
+def misalign_SN_inner_and_misalign_SN_outer_can(max_t, min_t):
+    if max_t == min_t:
+        misalign_SN_inner = misalign_SN_outer = 0.1 * min_t        
+    else:
+        misalign_SN_inner = misalign_SN_outer = 0.1 * min_t    
+    return np.array([misalign_SN_inner, misalign_SN_outer])
+
+###### calculates scf_butt_weld_outer and scf_butt_weld_inner of a single can and returns them in an array in same order
+def scf_butt_weld_outer_and_scf_butt_weld_inner_can(max_misalignment_en1991, ecc_thickness, misalign_SN_outer, misalign_SN_inner, max_t, min_t):
+    if max_t == min_t:
+        scf_butt_weld_outer = max(1 + 3*(max_misalignment_en1991 - misalign_SN_outer)/max_t, 1.0)
+    else:
+        scf_butt_weld_outer = 1 + ( 6. * ( max_misalignment_en1991 + ecc_thickness - misalign_SN_outer) ) / ( min_t * ( 1 + ( ( max_t ** 1.5 ) / ( min_t ** 1.5 )))) 
+    
+    if max_t == min_t:
+        scf_butt_weld_inner = scf_butt_weld_outer
+    else:
+        scf_butt_weld_inner = 1 + ( 6. * ( max_misalignment_en1991 + ecc_thickness + (-1)*misalign_SN_inner) ) / ( min_t * ( 1 + ( ( max_t ** 1.5 ) / ( min_t ** 1.5 ) ) ) ) 
+    
+    return np.array([scf_butt_weld_outer, scf_butt_weld_inner]) 
+
+###### calculates scf_cone_outer and scf_cone_inner of a single can and returns them in an array in same order
+def scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, dia, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height):        
+    if(np.abs( calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)) < 1e-03 ):
+        scf_cone_outer = 1.
+    else:
+        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * dia ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_below ** 2
+    
+    if(np.abs( calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)) < 1e-03 ):
+        scf_cone_inner = 1.
+    else:        
+        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * dia ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_above ** 2
+    
+    return np.array([scf_cone_outer, scf_cone_inner])
+
+###### calculates des of a single can
+def des_can(del_m_y, w_above, w_below):    
+    des = (del_m_y / min(w_above, w_below) ) / 1000
+    return des
+
+###### calculates thickness_factor of a single can
+def thickness_factor_can(max_t, t_ref, thickness_exponent_weld):    
+    if max_t > float(t_ref):
+        thickness_factor = ( max_t / float(t_ref) ) ** float(thickness_exponent_weld)
+    else:
+        thickness_factor = 1.
+    return thickness_factor
+
+###### calculates sigma_ref_EN_weld_factored of a single can
+def sigma_ref_en_weld_factored_can(loga1_weld, n_weld, m1_weld, thickness_factor, fatigue_material_factor, total_SCF):    
+    sigma_ref_weld = 10 ** ( (loga1_weld - np.log10(n_weld) ) / m1_weld)
+    sigma_ref_weld_factored = sigma_ref_weld / (thickness_factor * fatigue_material_factor * total_SCF)
+    return sigma_ref_weld_factored
+
+###### calculates n_allowable_weld, damage_weld, DEL_margin_fatigue_weld of a single can and returns them in an array in same order
+def margin_fatigue_weld_can(sigma_ref_en_weld_factored, del_m, des, del_nref):
+    n_allowable_weld = 10**( np.log10(2e6) + del_m * (np.log10(sigma_ref_en_weld_factored) - np.log10(des)) )
+    damage_weld = del_nref/n_allowable_weld    
+    del_margin_fatigue_weld = ( ( 1 / damage_weld**(1/ del_m ) ) - 1 ) * 100  
+    return np.array([n_allowable_weld, damage_weld, del_margin_fatigue_weld])
+
+###### calculates sigma_ref_bracket of a single can
+def sigma_ref_bracket_factored_can(loga1_bracket, scf_additional, fatigue_material_factor):
+    sigma_ref_bracket = 10**( ( loga1_bracket - np.log10(2e6) ) / 3. ) 
+    sigma_ref_bracket_factored = sigma_ref_bracket / ( scf_additional * fatigue_material_factor )        
+    return sigma_ref_bracket_factored
+
+###### calculates N_allow_brackets, damage_brackets, DEL_margin_fatigue_brackets of a single can and returns them in an array in same order
+def margin_fatigue_brackets_can(n_bracket, sigma_ref_bracket_factored, del_m, des, del_nref):
+    n_allowable_bracket = 10**( np.log10( n_bracket ) + del_m * ( np.log10(sigma_ref_bracket_factored) - np.log10(des) ) )       
+    damage_bracket = del_nref/n_allowable_bracket    
+    del_margin_fatigue_brackets = ( ( 1 / damage_bracket**(1/ del_m )) - 1 ) * 100
+    return np.array([n_allowable_bracket, damage_bracket, del_margin_fatigue_brackets])
+
 	# add column headers in output file
 def single_can_calculation(max_misalignment, ue_max, t_below, t_above, dia, can_outer_dia_bottom, can_outer_dia_top, height, del_m_y_can, scf_additional,
                                 w_above, w_below, dc_weld, dc_bracket, thickness_exponent_weld, t_ref, fatigue_material_factor, loga1_weld, n_weld, m1_weld,
