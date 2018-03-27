@@ -280,7 +280,7 @@ for row in tower_sections:
             ### array used for storing all columns' value for a single can
             can_columns = np.zeros(27)
             h_can = tower_cans[i][2]  # Column C
-            outer_dia_bottom_can = tower_cans[i][3]  # Column D
+            outer_dia_bottom_can = tower_cans[i][4]  # Column D
             t_below_can = t_above_can = (tower_cans[i][4] - tower_cans[i][6]) / 2 # Column E and F
             # Column G and H # above and below section modulus will be same for top weld point in each section
             section_modulus_below_can = section_modulus_above_can = (np.pi/(32*tower_cans[i][4]))*(tower_cans[i][4]**4 - tower_cans[i][6]**4)       
@@ -299,7 +299,7 @@ for row in tower_sections:
                                                 tower_options['m1_bracket'], can_height, 1., 1., 1.)
             
             ### storing all columns' values for output in an array
-            can_columns[0] = h_can
+            can_columns[0] = h_can 
             can_columns[1] = outer_dia_bottom_can
             can_columns[2] = t_below_can
             can_columns[3] = t_above_can
@@ -316,4 +316,4 @@ column_header = "H, D, t_below, t_above, w_below, w_above, max_misalignment_en19
                 " DES, thickness_factor, sigma_ref_EN_weld_factored, N_allow_weld, damage_weld, DEL_margin_fatigue_weld," + \
                 " N_allow_brackets, damage_brackets, DEL_margin_fatigue_brackets"
                 
-np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.10f', delimiter=',', header= column_header)    
+np.savetxt('tower_fatigue_output.csv', tower_fatigue_points, fmt='%0.10f', delimiter=',', header= column_header)
