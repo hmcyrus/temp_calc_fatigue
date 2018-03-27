@@ -1,5 +1,6 @@
 import numpy as np
 import os
+import xlwings as xw
 
 def calc_tan_alpha(d_base, d_top, h):    
     return ((d_base - d_top) / 2) / h
@@ -49,16 +50,16 @@ def scf_butt_weld_outer_and_scf_butt_weld_inner_can(max_misalignment_en1991, ecc
     return np.array([scf_butt_weld_outer, scf_butt_weld_inner]) 
 
 ###### calculates scf_cone_outer and scf_cone_inner of a single can and returns them in an array in same order
-def scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, dia, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height):        
+def scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height):        
     if(np.abs( calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)) < 1e-03 ):
         scf_cone_outer = 1.
     else:
-        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * dia ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_below ** 2
+        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * can_outer_dia_bottom ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_below ** 2
     
     if(np.abs( calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)) < 1e-03 ):
         scf_cone_inner = 1.
     else:        
-        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * dia ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_above ** 2
+        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * can_outer_dia_bottom ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_above ** 2
     
     return np.array([scf_cone_outer, scf_cone_inner])
 
@@ -101,9 +102,8 @@ def margin_fatigue_brackets_can(n_bracket, sigma_ref_bracket_factored, del_m, de
     damage_bracket = del_nref/n_allowable_bracket    
     del_margin_fatigue_brackets = ( ( 1 / damage_bracket**(1/ del_m )) - 1 ) * 100
     return np.array([n_allowable_bracket, damage_bracket, del_margin_fatigue_brackets])
-
-	# add column headers in output file
-def single_can_calculation(max_misalignment, ue_max, t_below, t_above, dia, can_outer_dia_bottom, can_outer_dia_top, height, del_m_y_can, scf_additional,
+    
+def single_can_calculation(max_misalignment, ue_max, t_below, t_above, can_outer_dia_bottom, can_outer_dia_top, height, del_m_y_can, scf_additional,
                                 w_above, w_below, dc_weld, dc_bracket, thickness_exponent_weld, t_ref, fatigue_material_factor, loga1_weld, n_weld, m1_weld,
                                 del_m, del_nref, loga1_bracket, n_bracket, m1_bracket, can_height, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev):
     max_t = max(t_above, t_below)
@@ -134,7 +134,7 @@ def single_can_calculation(max_misalignment, ue_max, t_below, t_above, dia, can_
 
     # # Column AB,AC # SCF_cone_outer, SCF_cone_inner
     # [0] - outer, [1]- inner
-    scf_cone_array = scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, dia, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)    
+    scf_cone_array = scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)    
     can_values = np.append(can_values, scf_cone_array)
     
     # # Column AD # total_SCF
@@ -192,12 +192,20 @@ assert tower_sections[total_sections-1][2] == total_cans , "mismatch in can numb
 if os.path.isfile("tower_options_input.csv"):
     print "reading tower_options"
 
-# dc_weld-0, dc_bracket-1, calc_SCF_butt-2, calc_SCF_cone-3, calc_SCF_flange-4, weld_prep_angle-5, weld_ground_flush-6
-# joint_type-7, max_misalignment_accidental_eccentricity-8, additional_SCF-9, quality_class-10, Ue_max-11,
-# thickness_exponent_weld-12, t_ref-13, fatigue_material_factor-14, DEL_Nref-15, N-16, m1-17, m2-18, loga1-19, loga2-20 
-# N_bracket-21, m1_bracket-22, m2_bracket-23, loga1_bracket-24, loga2_bracket-25, DEL_m-26
-tower_options = np.genfromtxt('tower_options_input.csv', delimiter=',', skip_header=1, dtype='unicode')
+# read tower_options_input.csv into a dictionary
+wb = xw.Book(r"E:\Work-tamal-bhai\fresh\tower_options_input.csv")
 
+tower_options = {}
+
+for index in range(1,  len(wb.sheets[0].range('A1:AA1')) + 1 ):
+    print wb.sheets[0].range((1,index), (2,index)).value
+    if(type(wb.sheets[0].range((1,index), (2,index)).value[0]) == type(wb.sheets[0].range((1,index), (2,index)).value[1])):
+        tower_options[str(wb.sheets[0].range((1,index), (2,index)).value[0])] = str.strip( str(wb.sheets[0].range((1,index), (2,index)).value[1]))
+    else:
+        tower_options[str(wb.sheets[0].range((1,index), (2,index)).value[0])] = float(wb.sheets[0].range((1,index), (2,index)).value[1])
+
+#print tower_options['ue_max']
+#print type(tower_options['ue_max'])
 # total weld points = total number of cans + total number of sections
 total_fatigue_points = total_cans + total_sections
 tower_fatigue_points = np.zeros( shape = (total_fatigue_points, 27) )
@@ -225,7 +233,7 @@ for row in tower_sections:
         ### array used for storing all columns' value for a single can
         can_columns = np.zeros(27, dtype=float)
         h_can = tower_cans[i][1]  # Column C
-        dia_can = tower_cans[i][3]  # Column D #max comparison for D is to be done here
+        outer_dia_bottom_can = tower_cans[i][3]  # Column D #max comparison for D is to be done here
         # t_bottom, t_top
         if i == 0 :
             t_below_can = t_above_can = (tower_cans[i][3] - tower_cans[i][5]) / 2 
@@ -240,17 +248,23 @@ for row in tower_sections:
             section_modulus_above_can = (np.pi/(32*tower_cans[i][3]))*(tower_cans[i][3]**4 - tower_cans[i][5]**4)
         
         print fatigue_point_counter
+        
+        outer_dia_top_can = tower_cans[i][4]
+        del_m_y_can = tower_del_my[fatigue_point_counter]  ## del_my of current fatigue point
+        can_height = float(tower_cans[i][9]) ## height of each can
+                 
+        can_values = single_can_calculation(tower_options['max_misalignment'], tower_options['ue_max'], t_below_can, t_above_can, outer_dia_bottom_can, 
+                                            outer_dia_top_can, h_can, del_m_y_can, 
+                                            tower_options['scf_additional'], section_modulus_above_can, section_modulus_below_can, 
+                                            tower_options['dc_weld'], tower_options['dc_bracket'], 
+                                            tower_options['thickness_exponent_weld'], tower_options['t_ref'], tower_options['fatigue_material_factor'],
+                                            tower_options['loga1_weld'], tower_options['n_weld'], tower_options['m1_weld'],
+                                            tower_options['del_m'], tower_options['del_nref'], tower_options['loga1_bracket'], tower_options['n_bracket'], 
+                                            tower_options['m1_bracket'], can_height, outer_dia_base_prev, outer_dia_top_prev, h_prev )
 
-        can_values = single_can_calculation(float(tower_options[8]), float(tower_options[11]), t_below_can, t_above_can, dia_can, tower_cans[i][3], tower_cans[i][4], 
-        h_can, tower_del_my[fatigue_point_counter], float(tower_options[9]),        
-        section_modulus_above_can, section_modulus_below_can, float(tower_options[0]), float(tower_options[1]), float(tower_options[12]), float(tower_options[13]), float(tower_options[14]),        
-        float(tower_options[19]), float(tower_options[16]), float(tower_options[17]),        
-        float(tower_options[26]), float(tower_options[15]), float(tower_options[24]), float(tower_options[21]), float(tower_options[22]), float(tower_cans[i][9]),
-        outer_dia_base_prev, outer_dia_top_prev, h_prev )
-
-        ### storing all columns' values in an array
+        ### storing all columns' values for output in an array
         can_columns[0] = h_can
-        can_columns[1] = dia_can
+        can_columns[1] = outer_dia_bottom_can
         can_columns[2] = t_below_can
         can_columns[3] = t_above_can
         can_columns[4] = section_modulus_below_can
@@ -266,22 +280,27 @@ for row in tower_sections:
             ### array used for storing all columns' value for a single can
             can_columns = np.zeros(27)
             h_can = tower_cans[i][2]  # Column C
-            dia_can = tower_cans[i][3]  # Column D
+            outer_dia_bottom_can = tower_cans[i][3]  # Column D
             t_below_can = t_above_can = (tower_cans[i][4] - tower_cans[i][6]) / 2 # Column E and F
             # Column G and H # above and below section modulus will be same for top weld point in each section
             section_modulus_below_can = section_modulus_above_can = (np.pi/(32*tower_cans[i][4]))*(tower_cans[i][4]**4 - tower_cans[i][6]**4)       
             print "top weld point for section- " + str(int(row[0]))  # no need to add 1, section number starts from 1
             print fatigue_point_counter
-            can_values = single_can_calculation(float(tower_options[8]), float(tower_options[11]), t_below_can, t_above_can, dia_can, tower_cans[i][3], tower_cans[i][4], 
-                                        h_can, tower_del_my[fatigue_point_counter], float(tower_options[9]),        
-                                        section_modulus_above_can, section_modulus_below_can, float(tower_options[0]), float(tower_options[1]), float(tower_options[12]), float(tower_options[13]), float(tower_options[14]),        
-                                        float(tower_options[19]), float(tower_options[16]), float(tower_options[17]),        
-                                        float(tower_options[26]), float(tower_options[15]), float(tower_options[24]), float(tower_options[21]), float(tower_options[22]), tower_cans[i][9],
-                                        1., 1., 1.)
+            outer_dia_top_can = tower_cans[i][4]
+            del_m_y_can = tower_del_my[fatigue_point_counter]  ## del_my of current fatigue point
+            can_height = float(tower_cans[i][9]) ## height of each can
             
-            ### storing all columns' values in an array
+            can_values = single_can_calculation(tower_options['max_misalignment'], tower_options['ue_max'], t_below_can, t_above_can, outer_dia_bottom_can, outer_dia_top_can, 
+                                                h_can, del_m_y_can, tower_options['scf_additional'], section_modulus_above_can, section_modulus_below_can, 
+                                                tower_options['dc_weld'], tower_options['dc_bracket'], 
+                                                tower_options['thickness_exponent_weld'], tower_options['t_ref'], tower_options['fatigue_material_factor'],
+                                                tower_options['loga1_weld'], tower_options['n_weld'], tower_options['m1_weld'],
+                                                tower_options['del_m'], tower_options['del_nref'], tower_options['loga1_bracket'], tower_options['n_bracket'], 
+                                                tower_options['m1_bracket'], can_height, 1., 1., 1.)
+            
+            ### storing all columns' values for output in an array
             can_columns[0] = h_can
-            can_columns[1] = dia_can
+            can_columns[1] = outer_dia_bottom_can
             can_columns[2] = t_below_can
             can_columns[3] = t_above_can
             can_columns[4] = section_modulus_below_can
