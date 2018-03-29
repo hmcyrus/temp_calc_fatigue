@@ -167,22 +167,28 @@ def single_can_calculation(max_misalignment, ue_max, t_below, t_above, can_outer
     return can_values
 
 def read_inputs():
-    if os.path.isfile("tower_sections_input.csv"):
+    if os.path.isfile("tower_sections_script_input.csv"):
+#    if os.path.isfile("tower_sections_input.csv"):
         print "reading section inputs"
     else:
         print "tower_sections.csv not found"
     
+    
+    tower_sections = np.genfromtxt('tower_sections_script_input.csv', delimiter=',', skip_header=1)
     #section_no-0, can_no_base-1, can_no_top-2, height_flange_base-3, height_flange_top-4
-    tower_sections = np.genfromtxt('tower_sections_input.csv', delimiter=',', skip_header=1)
+#    tower_sections = np.genfromtxt('tower_sections_input.csv', delimiter=',', skip_header=1)
     total_sections = int(np.shape(tower_sections)[0])
     print "number of sections read - " + str(total_sections)
     
-    if os.path.isfile("tower_cans_input.csv"):
+    if os.path.isfile("tower_cans_script_input.csv"):
+#    if os.path.isfile("tower_cans_input.csv"):
         print "reading can inputs"
     
     #can_no-0, can_height_bottom-1, can_height_top-2, can_outer_dia_bottom-3, can_outer_dia_top-4, 
     #can_inner_dia_bottom-5, can_inner_dia_top-6, section_modulus_bottom-7, section_modulus_top-8
-    tower_cans = np.genfromtxt('tower_cans_input.csv', delimiter=',', skip_header=1)
+#    tower_cans = np.genfromtxt('tower_cans_input.csv', delimiter=',', skip_header=1)
+    tower_cans = np.genfromtxt('tower_cans_script_input.csv', delimiter=',', skip_header=1)
+    
     
     total_cans = int(np.shape(tower_cans)[0])
     print "number of cans read - " + str(total_cans)
@@ -206,12 +212,13 @@ def read_inputs():
     
     #print tower_options['ue_max']
     #print type(tower_options['ue_max'])
-    # total weld points = total number of cans + total number of sections    
-    
-    if os.path.isfile("tower_cans_del_my_input.csv"):
+    # total weld points = total number of cans + total number of sections        
+    if os.path.isfile("tower_cans_del_my_script_input.csv"):
+#    if os.path.isfile("tower_cans_del_my_input.csv"):
         print "reading del_my"
     total_fatigue_points = total_cans + total_sections
-    tower_del_my = np.genfromtxt('tower_cans_del_my_input.csv', delimiter=',', skip_header=1)    
+#    tower_del_my = np.genfromtxt('tower_cans_del_my_input.csv', delimiter=',', skip_header=1)    
+    tower_del_my = np.genfromtxt('tower_cans_del_my_script_input.csv', delimiter=',', skip_header=1)    
     assert int(np.shape(tower_del_my)[0]) == total_fatigue_points, "correct number of del_my"
     return [tower_sections, tower_cans, tower_del_my, tower_options] 
 
