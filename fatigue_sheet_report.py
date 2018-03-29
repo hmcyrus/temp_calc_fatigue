@@ -35,7 +35,11 @@ def diff_percentage_between_ranges(calculated_array, expected_array, if_print_ar
     assert len(calculated_array) == len(expected_array), "found_array and expected_array have different length"
     difference_array_percentage = np.zeros(len(calculated_array), dtype=float)
     for index in range(0, len(calculated_array)):
-        difference_array_percentage[index] = ((expected_array[index] - calculated_array[index])/expected_array[index])*100
+#        print expected_array[index]
+        if(expected_array[index] != 0):
+            difference_array_percentage[index] = ((expected_array[index] - calculated_array[index])/expected_array[index])*100
+        else:
+            difference_array_percentage[index] = expected_array[index] - calculated_array[index]        
     
     return difference_array_percentage
 
@@ -62,12 +66,12 @@ def report_single_column(calculated_sheet, expected_sheet, calculated_begin_inde
     expected_array = fetch_range_from_sheet(expected_sheet, expected_begin_index, expected_end_index)
     difference_points[:,column_index] = diff_value_between_ranges(calculated_array, expected_array, 0)
     column_index+=1
-    difference_points[:,column_index] = diff_value_between_ranges(calculated_array, expected_array, 0)
+    difference_points[:,column_index] = diff_percentage_between_ranges(calculated_array, expected_array, 0)
     column_index+=1    
     return difference_points
     
 #test_diff_function()
-#test_value_diff_function()
+test_value_diff_function()
 #test_percentage_diff_function()
     
 #wb_target_excel = xw.Book(r"D:\tower_geo\project\Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm")
@@ -79,6 +83,7 @@ expected_sheet = xw.Book(r"D:\tower_geo\project\Python_171106_Tower_v1.15_loads_
 column_index = 0;
 difference_points = np.zeros( shape = (54, 51) )
 difference_points[:,column_index] = range(1,55)
+print difference_points
 column_index+=1
 column_header = "number"
 
