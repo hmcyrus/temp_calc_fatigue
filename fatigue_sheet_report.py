@@ -1,5 +1,6 @@
 import numpy as np
 import xlwings as xw
+import os
 
 def fetch_range_from_sheet(xw_sheet, cell_begin, cell_end):
     return xw_sheet.range(cell_begin + ':' + cell_end).value
@@ -22,10 +23,12 @@ def diff_value_between_ranges(calculated_array, expected_array, if_print_arrays)
         print "found_array " + str(calculated_array)
         print "expected_array " + str(expected_array)
     assert len(calculated_array) == len(expected_array), "found_array and expected_array have different length"
-    difference_array = np.zeros(len(calculated_array), dtype=float)    
+    difference_array = np.zeros(len(calculated_array)+1, dtype=float)    
+    
     for index in range(0, len(calculated_array)):
         difference_array[index] = expected_array[index] - calculated_array[index]        
-    
+    difference_array[len(calculated_array)] = max(difference_array, key=abs)
+#    print "index - " + str(index)
     return difference_array
 
 def diff_percentage_between_ranges(calculated_array, expected_array, if_print_arrays):
@@ -33,14 +36,14 @@ def diff_percentage_between_ranges(calculated_array, expected_array, if_print_ar
         print "found_array " + str(calculated_array)
         print "expected_array " + str(expected_array)
     assert len(calculated_array) == len(expected_array), "found_array and expected_array have different length"
-    difference_array_percentage = np.zeros(len(calculated_array), dtype=float)
+    difference_array_percentage = np.zeros(len(calculated_array)+1, dtype=float)
     for index in range(0, len(calculated_array)):
 #        print expected_array[index]
         if(expected_array[index] != 0):
             difference_array_percentage[index] = ((expected_array[index] - calculated_array[index])/expected_array[index])*100
         else:
             difference_array_percentage[index] = expected_array[index] - calculated_array[index]        
-    
+    difference_array_percentage[len(calculated_array)] = max(difference_array_percentage, key=abs)
     return difference_array_percentage
 
 def test_diff_function():
@@ -76,13 +79,19 @@ test_value_diff_function()
     
 #wb_target_excel = xw.Book(r"D:\tower_geo\project\Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm")
 #wb_fatigue_output = xw.Book(r"E:\Work-tamal-bhai\fresh\tower_fatigue_output.csv")
-
-calculated_sheet = xw.Book(r"E:\Work-tamal-bhai\fresh\tower_fatigue_output.csv").sheets[0]
+#folder_path = "test_results\\j9\\plus"
+#folder_path = "test_results\\j9\\minus"
+#folder_path = "test_results\\k11\\plus"
+#folder_path = "test_results\\k11\\minus"
+#folder_path = "test_results\\k13\\plus"
+#folder_path = "test_results\\k13\\minus"
+folder_path = "test_results\\original"
+calculated_sheet = xw.Book(folder_path + "\\tower_fatigue_output.csv").sheets[0]
 expected_sheet = xw.Book(r"D:\tower_geo\project\Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm").sheets['Fatigue']
 
 column_index = 0;
-difference_points = np.zeros( shape = (54, 51) )
-difference_points[:,column_index] = range(1,55)
+difference_points = np.zeros( shape = (55, 51) )
+difference_points[:,column_index] = range(1,56)
 print difference_points
 column_index+=1
 column_header = "number"
@@ -188,8 +197,10 @@ difference_points = report_single_column(calculated_sheet, expected_sheet, "Y2",
 column_index += 2
 column_header = column_header + ", DEL_margin_fatigue_brackets, DEL_margin_fatigue_brackets_percent"
 
-			
-np.savetxt('fatigue_report.csv', difference_points, delimiter=',', header= column_header)
+#folder_name = "results\\original"	
+#folder_name = "results\\J9\\minus"	
+#os.makedirs(folder_name)	
+np.savetxt(folder_path + '\\fatigue_report.csv', difference_points, delimiter=',', header= column_header)
 
 ### Excel column ()
 #difference_points = report_single_column(calculated_sheet, expected_sheet, "2", "55", "11", "64", difference_points, column_index)
