@@ -1,0 +1,4 @@
+conda create -n pytorchenv python=3.6 numpy pyyaml mkl
+
+conda install -c peterjc123 pytorch-cpu
+
