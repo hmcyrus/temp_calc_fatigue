@@ -57,22 +57,26 @@ def scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, can_outer_dia_bottom
     
     if can_outer_dia_bottom == 1. :
         tan_alpha = calc_tan_alpha(can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev)
+        D = can_outer_dia_bottom_prev
     else:
         tan_alpha = calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height)
+        D = can_outer_dia_bottom
         
     if(np.abs( calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)) < 1e-03 ):
         scf_cone_outer = 1.
     else:
 #        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * can_outer_dia_bottom ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_below ** 2
-        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * can_outer_dia_bottom ) * tan_alpha ) / t_below ** 2
-    print t_below
-    print t_above
-    print can_outer_dia_bottom
+#        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * can_outer_dia_bottom ) * tan_alpha ) / t_below ** 2
+        scf_cone_outer = 1. + ( 0.6 * t_below * np.sqrt( (t_below + t_above) * D ) * tan_alpha ) / t_below ** 2
+    
+    print "t1=" + str(t_below) + ", t2=" + str(t_above) + ", D=" + str(D)
+    
     if(np.abs( calc_diff_in_alpha( can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)) < 1e-03 ):
         scf_cone_inner = 1.
     else:        
 #        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * can_outer_dia_bottom ) * calc_tan_alpha(can_outer_dia_bottom, can_outer_dia_top, can_height) ) / t_above ** 2
-        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * can_outer_dia_bottom ) * tan_alpha ) / t_above ** 2
+#        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * can_outer_dia_bottom ) * tan_alpha ) / t_above ** 2
+        scf_cone_inner = 1. + ( 0.6 * t_below * np.sqrt( (t_above + t_below) * D ) * tan_alpha ) / t_above ** 2
     
     return np.array([scf_cone_outer, scf_cone_inner])
 
@@ -148,7 +152,7 @@ def single_can_calculation(if_terminal_can, max_misalignment, ue_max, t_below, t
     # # Column AB,AC # SCF_cone_outer, SCF_cone_inner
     # [0] - outer, [1]- inner
     if if_terminal_can == 1:
-        print str(can_outer_dia_bottom_prev) + " -- " +  str(can_outer_dia_top_prev) + " -- " + str(can_height_prev)
+#        print str(can_outer_dia_bottom_prev) + " -- " +  str(can_outer_dia_top_prev) + " -- " + str(can_height_prev)
         scf_cone_array = scf_cone_outer_and_scf_cone_inner_can(t_below, t_above, can_outer_dia_bottom_prev, can_outer_dia_top_prev, can_height_prev, can_outer_dia_bottom, can_outer_dia_top, can_height)    
     else:
         scf_cone_array = np.array([1., 1.])
