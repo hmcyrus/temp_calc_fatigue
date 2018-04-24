@@ -1,0 +1,45 @@
+ranges that are read in read_inputs(wb)
+
+range for inputs accessed as inputs["section_shape"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$I$9:$I$18> 
+
+range for inputs accessed as inputs["can_thickness"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$H$25:$H$85> 
+
+range for inputs accessed as inputs["VIV.hotspot_inputs"] collected from sheet VIV is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]VIV!$A$290:$E$290> 
+
+range for inputs accessed as inputs["section_number"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$B$9:$B$19> 
+
+range for inputs accessed as inputs["fatigue.options"] collected from sheet Fatigue is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Fatigue!$I$10:$R$10> 
+
+range for inputs accessed as inputs["flange.optimization_inputs"] collected from sheet Flange is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Flange!$D$48:$D$57> 
+
+range for inputs accessed as inputs["can_length"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$G$25:$G$85> 
+
+range for inputs accessed as inputs["fload.RSM_input"] collected from sheet F_loads is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]F_Loads!$M$9:$N$9> 
+
+range for inputs accessed as inputs["preferred_plate_height"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$D$25:$D$85> 
+
+range for inputs accessed as inputs["general"] collected from sheet General_Inputs is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]General_Inputs!$C$4:$C$153> 
+
+range for inputs accessed as inputs["section_top_D"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$K$9:$K$18> 
+
+range for inputs accessed as inputs["can_no"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$F$25:$F$85> 
+
+range for inputs accessed as inputs["flange_top_can_no"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$F$9:$F$19> 
+
+range for inputs accessed as inputs["fload.DEL_input"] collected from sheet F_loads is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]F_Loads!$F$9:$G$9> 
+
+range for inputs accessed as inputs["flange.size_inputs"] collected from sheet Flange is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Flange!$D$20:$D$25> 
+
+range for inputs accessed as inputs["E_Loads.table"] collected from sheet E_Loads is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]E_Loads!$AL$9:$AV$9> 
+
+range for inputs accessed as inputs["flange.fatigue_inputs"] collected from sheet Flange is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Flange!$D$43:$D$45> 
+
+range for inputs accessed as inputs["flange.path_rainflow"] collected from sheet Flange is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Flange!$B$42> 
+
+range for inputs accessed as inputs["connection_inputs"] collected from sheet Flange is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Flange!$D$5:$D$18> 
+
+range for inputs accessed as inputs["section_base_D"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$J$9:$J$18> 
+
+range for inputs accessed as inputs["VIV.scenarios"] collected from sheet VIV is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]VIV!$C$22:$C$25> 
+
+range for inputs accessed as inputs["flange_base_can_no"] collected from sheet Towergeo is <Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$E$9:$E$19> 
