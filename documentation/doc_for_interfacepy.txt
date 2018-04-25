@@ -1,6 +1,7 @@
--> interface.calc_strength() is called from excel sheet using VBA script
-calc_strength() is defined as below 
-	def calc_strength(return_tower = False, wb=None ,inputs=None, t=None):
+What happens when "Calc Strength" button is pressed in Fatigue sheet
+
+-> interface.calc_strength() is called from excel sheet using VBA script which is defined as below
+					def calc_strength(return_tower = False, wb=None ,inputs=None, t=None):
 
 -> xw.Book.caller() returns the workbook which called the function
 
@@ -13,23 +14,61 @@ calc_strength() is defined as below
 -> line #461 is 
 					t = geo_setup(wb=wb,inputs=inputs, return_tower=True)
 		here in geo_setup() 
-			-> a tower object is constructed
-			-> ranges that are read in parse_library() and then assigned to t.library are as below 
-				accessed as library["DC"]
-				<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$B$20:$J$49>
-				accessed as library["structural_bolts"]
-				<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$C$9:$AA$14>
-				accessed as library["DIN_socket"]
-				<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$B$312:$J$391>
-				accessed as library["materials"]
-				<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$B$68:$F$302>
-				accessed as library["can_plate_stock"]
-				<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$AR$9:$AS$9>
-				accessed as library["buckling_kappa"]
-				<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$M$411:$P$411>
+		-> a tower object is constructed
+		-> ranges that are read in parse_library() and then assigned to t.library are as below 
+			accessed as library["DC"]
+			<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$B$20:$J$49>
+			accessed as library["structural_bolts"]
+			<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$C$9:$AA$14>
+			accessed as library["DIN_socket"]
+			<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$B$312:$J$391>
+			accessed as library["materials"]
+			<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$B$68:$F$302>
+			accessed as library["can_plate_stock"]
+			<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Towergeo!$AR$9:$AS$9>
+			accessed as library["buckling_kappa"]
+			<Range [Python_171106_Tower_v1.15_loads_iter6_set1_full_geo - Copy.xlsm]Library!$M$411:$P$411>
 
-			-> line #393 is 
+-> line #393 is 
 					 t.define_general_inputs(general) # general = general = inputs['general']
-				this line collects the general info from General_Inputs!$C$4:$C$153
+		this line collects the general info from General_Inputs!$C$4:$C$153
+				
+-> line #396 is
+					 t.generate_geometric_definition(elem_list = parse_element_list(wb,inputs))
+		
+		->parse_element_list(wb,inputs) returns a list of dictionary which contains all the cans and 
+		flanges from top to bottom. elem['type'] = 'c' for cans and elem['type'] = 'f' for flanges 
+		are the identifying property
+		
+		A can dictionary instance has the following key, value pairs
+			'type' is 'c' for cans
+			'can_no' from inputs['can_no']
+			'length' from inputs['can_length']
+			'thickness' from inputs['can_thickness']
+			'preferred_plate_height' from inputs['preferred_plate_height']
+			'D_align' is None for cans
+			'section_shape' from inputs['section_shape'] for corresponding section [line #91]
+			'section_number'
+		
+		A flange dictionary instance has the following key, value pairs	
 
+		'length' is flange_t + neck_height
+		'thickness' : t_neck_base,      
+		'D_align'     : d['D_base'],
+		'type' is 'f' for flanges
+		'section_shape'   
+		'section_number':
+		'can_no' is None for flange
+		'flange_t'
+		'flange_d'
+		'neck_height'
+		'neck_R_fillet'
+		
+		flange properties found in inputs['flange.size_inputs'] are
+		flange_t, flange_d, neck_height, neck_R_fillet, top_flange_t_neck_overwrite, bot_flange_t_neck_overwrite
+		
+		**flanges are made and insert into list from line #99 to line#149, 
+		**base and top flanges corresponding each section are constructed separetly
 
+-> line #151 to #189, it's not clear what these lines are doing
+		
